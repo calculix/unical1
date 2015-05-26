@@ -84,6 +84,9 @@ the .inp file.
 
 - Beam orientations are not treated yet.
 =========================================================================*/
+
+#define PROOL 1 // alternative output format
+
 #include <math.h>
 #include <stdio.h>
 #include <string.h>
@@ -379,6 +382,7 @@ exitif(fid==0,"Error opening file ",outname);
 writemesh(); /* write node point and element data to abaqus/calculix input file. */
 surface();   /* process groups for boundary conditions. */
 
+#ifndef PROOL
 /* write standard ABAQUS procedure calls: *frequency step. */
 fprintf(fid,"*material, name=steel\n");
 fprintf(fid,"*elastic\n");
@@ -393,6 +397,7 @@ fprintf(fid,"u\n");
 fprintf(fid,"*elfile, output=3D\n");
 fprintf(fid,"s, e\n");
 fprintf(fid,"*endstep\n");
+#endif
 
 /* close abaqus/calculix input file  */
 printf("unical: closing file %s\n", outname);
@@ -830,10 +835,18 @@ void writemesh()                                                              {
 int i,j,k,l,m,n,dim;
 
 printf("writemesh:  writing node point data. \n");
+#ifdef PROOL
+fprintf(fid, "*node, nset=Nall");
+#else
 fprintf(fid, "*node, nset=nall");
+#endif
 for(i=0;i<maxnode;i++)                                                   {
 if(i%10000==0) printf("writemesh: writing node %d\n", i);
+#ifdef PROOL
+fprintf(fid, "\n%d, %e, %e, %e",
+#else
 fprintf(fid, "\n%d, %g, %g, %g", 
+#endif
 nodenumbers[i], coords[3*i],coords[3*i+1],coords[3*i+2]);                }
 
 printf("writemesh: writing groups of nodes: *NSETs. \n");
