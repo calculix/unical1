@@ -85,7 +85,8 @@ the .inp file.
 - Beam orientations are not treated yet.
 =========================================================================*/
 
-#define PROOL 1 // alternative output format
+#define PROOL 1 // modification by prool: alternative output format.
+// Prool here: http://prool.kharkov.org http://calculix.kharkov.org <proolix@gmail.com>
 
 #include <math.h>
 #include <stdio.h>
@@ -334,6 +335,25 @@ int maxdimen, mindimen;    /* min and max dimensions found in model. */
 /*============================================================================*/
 int main (int argc, char **argv)                                               {
 /* printf("argc=%d\n", argc);  */
+#ifdef PROOL
+if(argc==3)
+{
+exitif(strlen(argv[1])>195, "unical: sorry input file name too long.", NULL);
+strcpy(inname, argv[1]);
+exitif(strlen(argv[1])>195, "unical: sorry output file name too long.", NULL);
+strcpy(outname, argv[2]);
+printf("unical1, Copyright(C) 2011 Bernhardi \n");
+printf("some modif. by prool, 2015. www.prool.kharkov.org\n");
+printf("unical comes with ABSOLUTELY NO WARRANTY. This is free\n");
+printf("software, and you are welcome to redistribute it under\n");
+printf("certain conditions, see http://www.gnu.org/licenses/gpl.html\n\n");
+}
+else
+{
+printf("unical: usage: unical inputfile outputfile\n");
+exit(0);
+}
+#else
 if(argc==2)                                                               {
 exitif(strlen(argv[1])>195, "unical: sorry file name too long.", NULL);
 strcpy(problem, argv[1]);
@@ -354,6 +374,7 @@ printf("certain conditions, see http://www.gnu.org/licenses/gpl.html\n\n");
 
 strcpy(inname, problem);
 strcat(inname, ".unv");
+#endif
 
 printf("unical: Reading from file %s\n",inname);
 fid = fopen(inname,"r");
@@ -374,8 +395,10 @@ printf("unical: closing universal file %s\n", inname);
 ret = fclose(fid);
 exitif(ret < 0,"while attempting to close file ",inname);  
 
+#ifndef PROOL
 strcpy(outname, problem);
 strcat(outname, ".inp");
+#endif
 printf("unical: writing to file %s\n",outname);
 fid = fopen(outname,"w");
 exitif(fid==0,"Error opening file ",outname);
