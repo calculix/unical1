@@ -332,6 +332,40 @@ int  faces[6][7][5]   =                                                 {
 0, 0, 0, 0, 0                                                             };
 
 int maxdimen, mindimen;    /* min and max dimensions found in model. */
+
+#ifdef PROOL
+#define BUFSIZ 512
+#define TMPNAME "prool.tmp"
+void process_e(char *filename)
+{FILE *f1, *f2;
+char buf[BUFSIZ], *pp;
+int i,len;
+
+f1=fopen(filename,"r");
+if (f1==NULL) {printf("prool_process_e: can't open input file `%s'\n",filename); return;}
+f2=fopen(TMPNAME,"w");
+if (f2==NULL) {printf("prool_process_e: can't open tmp file `%s'\n",TMPNAME); return;}
+
+while(!feof(f1))
+    {
+    buf[0]=0;
+    fgets(buf,BUFSIZ,f1);
+    // replace D to E
+    len=strlen(buf);
+    for (i=0;i<len;i++)
+	{
+	if (buf[i]=='D') buf[i]='E';
+	}
+    fputs(buf,f2);
+    }
+    
+fclose(f1);
+if (fclose(f2))
+ {printf("prool_process_e: can't close tmp file `%s'\n",TMPNAME); return;}
+
+}
+#endif
+
 /*============================================================================*/
 int main (int argc, char **argv)                                               {
 /* printf("argc=%d\n", argc);  */
@@ -375,6 +409,11 @@ printf("certain conditions, see http://www.gnu.org/licenses/gpl.html\n\n");
 strcpy(inname, problem);
 strcat(inname, ".unv");
 #endif
+
+#ifdef PROOL
+process_e(inname); // convert exponent letter D+00 to E+00
+strcpy(inname,TMPNAME);
+#endif 
 
 printf("unical: Reading from file %s\n",inname);
 fid = fopen(inname,"r");
