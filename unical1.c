@@ -468,6 +468,9 @@ exitif(ret < 0,"while attempting to close file ",outname);
 
 printf("unical: It was a pleasure serving you. Bye. \n");
 printf("unical: returning to system. \n");
+#ifdef PROOL
+if (remove(TMPNAME)) {printf("can't delete tmp file `%s'\n",TMPNAME); exit(1);}
+#endif
 exit(0);                                                                      }
 /*===========================================================================*/
 void countuni()                                                               {
