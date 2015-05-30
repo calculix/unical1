@@ -1097,13 +1097,13 @@ if(j==1) fprintf(fid,"%sF%d, S%d\n", groupnames[m],p,p);         }   }  }  }
 fprintf(fid, "\n");                                                            }
 /*==============================================================================*/
 void exitif(int expression,char* message, char* arg)                           {
-#ifdef PROOL
-if (remove(TMPNAME)) {printf("exitif(): can't delete tmp file `%s'\n",TMPNAME); exit(1);}
-#endif
 if(expression==0) return;
 if(message!=0) fprintf(stdout, "%s", message);
 if(arg!=0) fprintf(stdout, "%s", arg);
 fprintf(stdout, "\nexiting.\n");
+#ifdef PROOL
+if (remove(TMPNAME)) {printf("exitif(): can't delete tmp file `%s'\n",TMPNAME);}
+#endif
 exit(0);                                                                       }
 /*==============================================================================*/
 
