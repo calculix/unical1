@@ -334,11 +334,11 @@ int  faces[6][7][5]   =                                                 {
 int maxdimen, mindimen;    /* min and max dimensions found in model. */
 
 #ifdef PROOL
-#define BUFSIZ 512
+#define BUFSIZE 512
 #define TMPNAME "prool.tmp"
 void process_e(char *filename)
 {FILE *f1, *f2;
-char buf[BUFSIZ], *pp;
+char buf[BUFSIZE], *pp;
 int i,len;
 
 f1=fopen(filename,"r");
@@ -349,7 +349,7 @@ if (f2==NULL) {printf("prool_process_e: can't open tmp file `%s'\n",TMPNAME); re
 while(!feof(f1))
     {
     buf[0]=0;
-    fgets(buf,BUFSIZ,f1);
+    fgets(buf,BUFSIZE,f1);
     // replace D to E
     len=strlen(buf);
     for (i=0;i<len;i++)
