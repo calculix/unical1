@@ -463,6 +463,7 @@ fprintf(fid,"*endstep\n");
 
 /* close abaqus/calculix input file  */
 printf("unical: closing file %s\n", outname);
+fprintf(fid,"\n"); // prool: end of file
 ret = fclose(fid);
 exitif(ret < 0,"while attempting to close file ",outname);  
 
