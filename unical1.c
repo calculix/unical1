@@ -364,6 +364,12 @@ if (fclose(f2))
  {printf("prool_process_e: can't close tmp file `%s'\n",TMPNAME); return;}
 
 }
+
+void help(void)
+{
+printf
+("unical1 prool mod\n\nusage: unical1 inputfile outputfile\nor\nunical1 -f inputfile outputfile\n\nProol: http://prool.kharkov.org\n\n");
+}
 #endif
 
 /*============================================================================*/
@@ -377,15 +383,29 @@ strcpy(inname, argv[1]);
 exitif(strlen(argv[1])>195, "unical: sorry output file name too long.", NULL);
 strcpy(outname, argv[2]);
 printf("unical1, Copyright(C) 2011 Bernhardi \n");
-printf("some modif. by prool, 2015. www.prool.kharkov.org\n");
+printf("some modif. by prool, 2015-2017. http://prool.kharkov.org\n");
 printf("unical comes with ABSOLUTELY NO WARRANTY. This is free\n");
 printf("software, and you are welcome to redistribute it under\n");
 printf("certain conditions, see http://www.gnu.org/licenses/gpl.html\n\n");
+full=0;
+}
+else
+if(argc==4)
+{
+if (strcmp(argv[1],"-f"))
+		{
+		help();
+		return 1;
+		}
+full=1;
+strcpy(inname,argv[2]);
+strcpy(inname,argv[3]);
 }
 else
 {
-printf("unical: usage: unical inputfile outputfile\n");
-exit(0);
+help();
+//printf("unical: usage: unical inputfile outputfile\n");
+exit(2);
 }
 #else
 if(argc==2)                                                               {

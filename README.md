@@ -85,3 +85,14 @@ volumes and beams are wanted, shell elements must be manually removed from
 the .inp file. 
 
 - Beam orientations are not treated yet.
+
+------------------------------------------------------------
+From Prool:
+
+Prool mod usage:
+
+unical1 input.inp output.inp
+or
+unical1 -f input.inp output.inp
+
+Prool, http://prool.kharkov.org, http://calculix.kharkov.org
