@@ -399,7 +399,7 @@ if (strcmp(argv[1],"-f"))
 		}
 full=1;
 strcpy(inname,argv[2]);
-strcpy(inname,argv[3]);
+strcpy(outname,argv[3]);
 }
 else
 {
