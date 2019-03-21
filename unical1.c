@@ -46,7 +46,7 @@ To install and use:
 
 - go to that directory.
 
-- issue a "gcc -o2 -o unical unical1.c" command.
+- issue a "gcc -o2 -static -o unical unical2.c" command.
 
 - try it out using, for example, a universal file cube.unv: 
 "/path/unical cube".
@@ -92,6 +92,7 @@ the .inp file.
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <ctype.h> // add by prool
 
 void exitif();             /* return error message and exit. */
 void countuni();           /* count number of nodes and elements. */
@@ -259,12 +260,12 @@ char nomabq[16][10]=                                                    {
 int mapunv[16][21]=                                                     {
  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, /* null */
  1, 1, 2, 3, 4, 5, 6, 7, 8, 0, 0,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, /* C3D8 */
- 2, 1, 5, 3, 6, 4, 2, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, /* C3D6 */
- 3, 1, 4, 3, 2, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, /* C3D4 */
+ 2, 1, 2, 3, 4, 5, 6, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, /* C3D6 */
+ 3, 1, 2, 3, 4, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, /* C3D4 */
  4, 1, 3, 5, 7,13,15,17,19, 2, 4,  6, 8,14,16,18,20, 9,10,11,12, /* C3D20*/
  5, 1, 3, 5,10,12,14, 2, 4, 6,11, 13,15, 7, 8, 9, 0, 0, 0, 0, 0, /* C3D15*/
  6, 1, 3, 5,10, 2, 4, 6, 7, 8, 9,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, /* C3D10*/
- 7, 1, 2, 3, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, /* S3   */
+ 7, 1, 3, 2, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, /* S3   */
  8, 1, 5, 3, 6, 4, 2, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, /* S6   */
  9, 1, 4, 3, 2, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, /* S4R  */
 10, 1, 7, 5, 3, 8, 6, 4, 2, 0, 0,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, /* S8R  */
@@ -372,6 +373,29 @@ printf
 }
 #endif
 
+int name_is_elem(char * groupname) // by prool
+{
+char prool_buffer[BUFSIZE];
+int i, ret;
+char *cc, *groupname0;
+
+groupname0=groupname;
+
+for(i=0;i<BUFSIZE;i++) prool_buffer[i]=0;
+
+cc=prool_buffer;
+while (*groupname)
+	{
+	*cc++=toupper(*groupname++);
+	}
+if(strstr(prool_buffer,"ELEM")==NULL) ret=0;
+else ret=1;
+
+//printf("prool debug name_is_elem() name='%s' upper='%s' ret=%i\n", groupname0, prool_buffer, ret);
+
+return ret;
+}
+
 /*============================================================================*/
 int main (int argc, char **argv)                                               {
 /* printf("argc=%d\n", argc);  */
@@ -435,7 +459,7 @@ process_e(inname); // convert exponent letter D+00 to E+00
 strcpy(inname,TMPNAME);
 #endif 
 
-printf("unical: Reading from file %s\n",inname);
+//printf("unical: Reading from file %s\n",inname);
 fid = fopen(inname,"r");
 exitif(fid==0,"Error reading from file ",inname);
 
@@ -450,7 +474,7 @@ rewind(fid);
 readgroups();   /* read group information. */
 
 /* close universal file  */
-printf("unical: closing universal file %s\n", inname);
+//printf("unical: closing universal file %s\n", inname);
 ret = fclose(fid);
 exitif(ret < 0,"while attempting to close file ",inname);  
 
@@ -482,12 +506,12 @@ fprintf(fid,"*endstep\n");
 #endif
 
 /* close abaqus/calculix input file  */
-printf("unical: closing file %s\n", outname);
+//printf("unical: closing file %s\n", outname);
 fprintf(fid,"\n"); // prool: end of file
 ret = fclose(fid);
 exitif(ret < 0,"while attempting to close file ",outname);  
 
-printf("unical: It was a pleasure serving you. Bye. \n");
+printf("unical: conversion is done. check results carefully! \n");
 printf("unical: returning to system. \n");
 #ifdef PROOL
 if (remove(TMPNAME)) {printf("can't delete tmp file `%s'\n",TMPNAME); exit(1);}
@@ -497,6 +521,7 @@ exit(0);                                                                      }
 void countuni()                                                               {
 int i;
 int ncard; 
+int prool_i, prool_counter;
 
 /* Start counting elements and nodes on data set. */
 for(i=1;i<=15;i++) maxele[i]=0;
@@ -507,18 +532,18 @@ for(;;)                                                                  {
 
 sret=fgets(line, maxline, fid);
 if(sret==0)                                                           {
-printf("countunv: end-of-file while reading from %s\n", inname);
+//printf("countunv: end-of-file while reading from %s\n", inname);
 break;                                                                }
-/* printf("countunv: line=%s\n", line); */
+//printf("countunv: line=%s\n", line);
 
 if(strncmp(line, "    -1",6)==0)                                      {
 sret=fgets(line, maxline, fid);
 if(sret==0)                                                       {
-printf("countunv: end-of-file while reading from %s\n", inname);
+//printf("countunv: end-of-file while reading from %s\n", inname);
 break;                                                            }
 ret=sscanf(line, "%d", &key);
 exitif(ret==0, "countunv: unexpected error 1  while reading from ", inname);
-/* printf("countunv: inname=%s, key=%d\n", inname, key);  */
+//printf("countunv: inname=%s, key=%d\n", inname, key);
 
 if(key==2411)                                                     {
 printf("countunv: processing dataset 2411, nodes.\n");
@@ -529,7 +554,7 @@ inname);
 ret=sscanf(line, "%d", &key);
 exitif(ret==0, "countunv: unexpected error 1  while reading Set 2411 from ", 
 inname);
-/* printf("countunv:  node point number =%d\n", key);  */
+//printf("countunv:  node point number =%d\n", key);
 if(key==-1) break;
 maxnode++;
 sret=fgets(line, maxline, fid);
@@ -542,22 +567,22 @@ for(;;)                                                      {
 sret=fgets(line, maxline, fid);
 exitif(sret==0, "countunv: unexpected end-of-line while reading set 2412 from ", 
 inname);
-/* printf("countunv: line=%s\n", line); */
+//printf("countunv: line=%s\n", line);
 ret=sscanf(line, "%d %d ", &key,&utype);
 exitif(ret==0, "countunv: unexpected error 1 while reading set 2412 from ", 
 inname);
 if(key==-1) break;
-/* printf("countunv: key=%d, utype=%d\n", key, utype); */
+//printf("countunv: key=%d, utype=%d\n", key, utype);
 exitif(utype<1||utype>232, "countunv: wrong type of element.", 0);
 for(i=1;i<=86;i++)                                     {
 if(utype==eltypes[i][1])                          {      
 eltype=eltypes[i][0];
 btype=eltypes[i][2];                
 break;                                            }    }
-/* printf("countunv: key=%d, utype=%d, eltype=%d\n", key,utype,eltype);  */
+//printf("countunv: key=%d, utype=%d, eltype=%d\n", key,utype,eltype);
 sumele++;
 maxele[eltype]++;
-/* printf("maxele[%d]=%d\n",eltype,maxele[eltype]);  */
+//printf("maxele[%d]=%d\n",eltype,maxele[eltype]);
 
 if(btype==1)                                           {
 sret=fgets(line, maxline, fid);
@@ -581,26 +606,64 @@ ret=sscanf(line, "%d %d %d %d %d %d %d %d %d", &groupnumber,&dummy,
 &dummy,&dummy,&dummy, &dummy,&dummy,&nument);
 exitif(ret==0, "countunv: unexpected error 1 while reading set 2467 from ", 
 inname);
-/* printf("countunv: groupnumber=%d, nument=%d\n", groupnumber, nument); */
+printf("countunv: groupnumber=%d, nument=%d\n", groupnumber, nument);
 if(groupnumber==-1) break;
 maxgroup++;
-exitif(nument<=0, "countunv: error wrong nument <0", NULL);
+exitif(nument<=0, "countunv: error #1 wrong nument <0", NULL);
 sret=fgets(line, maxline, fid);
 exitif(sret==0, "countunv: unexpected end-of-line while reading set 2467 from ",
 inname);
 ret=sscanf(line, "%s", &groupname);
 exitif(ret==0, "countunv: error reading groupname.", NULL);
-/* printf("countunv: groupname=%s\n", groupname); */
+printf("countunv: groupname=%s\n", groupname);
 for(i=1;i<=nument/2+nument%2;i++)                      {
 sret=fgets(line, maxline, fid);
 exitif(sret==0, "countunv: unexpected end-of-line while reading set 2467 from ",
 inname);                                               }    }     }
 
+else if(key==2477) { // prool: begin of 2477 first processing
+printf("prool debug countunv: processing dataset 2477, groups.\n");
+for(;;)                                                     {
+sret=fgets(line, maxline, fid);
+//printf("prool header of group=%s\n", line);
+exitif(sret==0, "countunv: unexpected end-of-line while reading set 2477 from ", inname);
+ret=sscanf(line, "%d %d %d %d %d %d %d %d %d", &groupnumber,&dummy, &dummy,&dummy,&dummy, &dummy,&dummy,&nument);
+exitif(ret==0, "countunv: unexpected error 1 while reading set 2477 from ", inname);
+printf("prool debug countunv: groupnumber=%d, nument=%d\n", groupnumber, nument);
+if(groupnumber==-1) break;
+maxgroup++;
+exitif(nument<=0, "countunv: error #2 wrong nument <=0", NULL);
+sret=fgets(line, maxline, fid);
+//printf("prool groupname=%s\n", line);
+exitif(sret==0, "countunv: unexpected end-of-line while reading set 2477 from ", inname);
+ret=sscanf(line, "%s", &groupname);
+exitif(ret==0, "countunv: error reading groupname.", NULL);
+printf("prool debug countunv: groupname=%s\n", groupname);
+
+// by prool:
+prool_counter=0;
+for(;;)                      {// begin for
+sret=fgets(line, maxline, fid);
+exitif(sret==0, "countunv: unexpected end-of-line while reading set 2477 from ", inname);
+
+//printf("prool group line=%s\n", line);
+prool_i=sscanf(line, "%d %d %d %d %d %d %d %d", &dummy, &dummy, &dummy, &dummy, &dummy, &dummy, &dummy, &dummy);
+//printf("prool debug sscanf ret=%i\n", prool_i);
+if (prool_i==4)
+	{// prool: short line
+	prool_counter++;
+	}
+else
+	prool_counter+=2;
+if (prool_counter==nument) break;
+}/*end for*/
+}     } // prool: end of 2477 first processing
+
 else                                                              {
 for(;;)                                                     {
 sret=fgets(line, maxline, fid);
 if(sret==0)                                            {
-printf("countunv: end-of-file while reading from %s\n", inname);
+//printf("countunv: end-of-file while reading from %s\n", inname);
 break;                                                 }
 if(strncmp(line, "    -1",6)==0) break;                     }     }
                                                                       }   }
@@ -674,17 +737,17 @@ for(;;)                                                                  {
 
 sret=fgets(line, maxline, fid);
 if(sret==0)                                                           {
-printf("readnodes: end-of-file while reading from %s\n", inname);
+//printf("readnodes: end-of-file while reading from %s\n", inname);
 break;                                                                }
 
 if(strncmp(line, "    -1",6)==0)                                      {
 sret=fgets(line, maxline, fid);
 if(sret==0)                                                       {
-printf("readnodes: end-of-file while reading from %s\n", inname);
+//printf("readnodes: end-of-file while reading from %s\n", inname);
 break;                                                            }
 ret=sscanf(line, "%d", &key);
 exitif(ret==0, "readnodes: unexpected error 1  while reading from ", inname);
-/* printf("readnodes: inname=%s, key=%d\n", inname, key); */
+//printf("readnodes: inname=%s, key=%d\n", inname, key);
 
 if(key==2411)                                                     {
 for(;;)                                                      {
@@ -694,7 +757,7 @@ inname);
 ret=sscanf(line, "%d", &key);
 exitif(ret==0, "readnodes: unexpected error 1  while reading Set 2411 from ", 
 inname);
-/* printf("readnodes:  node point number =%d\n", key); */
+//printf("readnodes:  node point number =%d\n", key);
 if(key==-1) break;
 numnode++;
 
@@ -706,7 +769,7 @@ inname);
 ret=sscanf(line, "%lf %lf %lf", &x,&y,&z);
 exitif(ret==0, "readnodes: unexpected error 1  while reading Set 2411 from ", 
 inname);
-/* printf("node=%d, x=%g, y=%g, z=%g\n", key,x,y,z);   */
+//printf("node=%d, x=%g, y=%g, z=%g\n", key,x,y,z);
 coords[(numnode-1)*3]=x;
 coords[(numnode-1)*3+1]=y;
 coords[(numnode-1)*3+2]=z;                                   }    }
@@ -715,7 +778,7 @@ else                                                              {
 for(;;)                                                     {
 sret=fgets(line, maxline, fid);
 if(sret==0)                                            {
-printf("readnodes: end-of-file while reading from %s\n", inname);
+//printf("readnodes: end-of-file while reading from %s\n", inname);
 break;                                                 }     
 if(strncmp(line, "    -1",6)==0) break;                     }    }   }   }    }
 /*===========================================================================*/
@@ -730,17 +793,17 @@ for(;;)                                                                  {
 
 sret=fgets(line, maxline, fid);
 if(sret==0)                                                           {
-printf("readelements: end-of-file while reading from %s\n", inname);
+//printf("readelements: #1 end-of-file while reading from %s\n", inname);
 break;                                                                }
 if(strncmp(line, "    -1",6)==0)                                      {
 sret=fgets(line, maxline, fid);
 if(sret==0)                                                       {
-printf("readnodes: end-of-file while reading from %s\n", inname);
+//printf("readnodes: end-of-file while reading from %s\n", inname);
 break;                                                            }
 
 ret=sscanf(line, "%d", &key);
 exitif(ret==0, "readelements: unexpected error 1  while reading from ", inname);
-/* printf("readelements: inname=%s, key=%d\n", inname, key); */
+//printf("readelements: inname=%s, key=%d\n", inname, key);
 
 if(key==2412)                                                     {
 for(;;)                                                      {
@@ -751,15 +814,15 @@ ret=sscanf(line, "%d %d ", &key,&utype);
 exitif(ret==0, "readelements: unexpected error 1 while reading set 2412 from ", 
 inname);
 if(key==-1) break;
-/* printf("readelements: key=%d, universal element type=%d\n", key, utype); */
+//printf("readelements: key=%d, universal element type=%d\n", key, utype);
 exitif(utype<1||utype>232, "readelements: wrong type of element.", 0);
 for(i=1;i<=86;i++)                                     {
 if(utype==eltypes[i][1])                          {      
 eltype=eltypes[i][0];
 btype=eltypes[i][2];                
 break;                                            }    }
-/* printf("readelements: key=%d, utype=%d, eltype=%d\n", key,utype,eltype);
-printf("readelements: numnodes[eltype]=%d\n", numnodes[eltype]); */
+//printf("readelements: key=%d, utype=%d, eltype=%d\n", key,utype,eltype);
+//printf("readelements: numnodes[eltype]=%d\n", numnodes[eltype]);
 numele++;
 elnumber[eltype]++;
 exitif(elnumber[eltype]>maxele[eltype], 
@@ -773,7 +836,7 @@ inname);                                               }
 
 ncard=numnodes[eltype]/8;
 if(numnodes[eltype]%8>0) ncard=ncard+1;
-/* printf("readelements: eltype=%d, ncard=%d\n", eltype, ncard); */
+//printf("readelements: eltype=%d, ncard=%d\n", eltype, ncard);
 for(j=0;j<ncard;j++)                                   {
 sret=fgets(line, maxline, fid);
 exitif(sret==0, "readelements: unexpected end-of-line, reading set 2412 from ",
@@ -783,9 +846,7 @@ ret=sscanf(line, " %d %d %d %d %d %d %d %d ",
 ln,ln+1,ln+2,ln+3,ln+4,ln+5,ln+6,ln+7);
 exitif(ret<=0, "readelements: unexpected error 1 while reading elnode from ", 
 inname);
-/* printf("readelements: element=%d, nodes=%d %d %d %d %d %d %d %d\n", 
-elnumbers[eltype][elnumber[eltype]-1],
-*ln,*(ln+1),*(ln+2),*(ln+3),*(ln+4),*(ln+5),*(ln+6),*(ln+7)); */
+//printf("readelements: element=%d, nodes=%d %d %d %d %d %d %d %d\n", elnumbers[eltype][elnumber[eltype]-1], *ln,*(ln+1),*(ln+2),*(ln+3),*(ln+4),*(ln+5),*(ln+6),*(ln+7));
                                                        }
 for(i=1;i<=numnodes[eltype];i++)                       {
 k=mapunv[eltype][i];
@@ -796,46 +857,56 @@ else                                                              {
 for(;;)                                                     {
 sret=fgets(line, maxline, fid);
 if(sret==0)                                            {
-printf("readelements: end-of-file while reading from %s\n", inname);
+//printf("readelements: #2 end-of-file while reading from %s\n", inname);
 break;                                                 }   
-if(strncmp(line, "    -1",6)==0) break;                     }     }   }   }   }
+if(strncmp(line, "    -1",6)==0) break;                     }     }   }   }  
+//printf("prool trace #01\n");
+}
 /*===========================================================================*/
 void readgroups()                                                             {
 int i,l;
+int prool_counter;
 
+//printf("prool trace #02\n");
 numgroup=-1;
 /* start reading groups. */
 for(;;)                                                                  {
 
+//printf("prool trace #03\n");
 sret=fgets(line, maxline, fid);
+//printf("prool trace #04\n");
 if(sret==0)                                                           {
-printf("readgroups: end-of-file while reading from %s\n", inname);
+//printf("readgroups: end-of-file while reading from %s\n", inname);
 break;                                                                }
 
 if(strncmp(line, "    -1",6)==0)                                      {
 sret=fgets(line, maxline, fid);
+//printf("prool trace #05\n");
 if(sret==0)                                                       {
-printf("readgroups: end-of-file while reading from %s\n", inname);
+//printf("readgroups: end-of-file while reading from %s\n", inname);
 break;                                                            }
 
 ret=sscanf(line, "%d", &key);
+//printf("prool trace #06\n");
 exitif(ret==0, "readnodes: unexpected error 1  while reading from ", inname);
-/* printf("readgroups: inname=%s, key=%d\n", inname, key); */
+//printf("readgroups: inname=%s, key=%d\n", inname, key);
+//printf("prool trace #07\n");
 
 if(key==2467)                                                     {
 for(;;)                                                       {
 sret=fgets(line, maxline, fid);
+//printf("prool trace #08\n");
 exitif(sret==0, "readgroups: unexpected end-of-line while reading set 2467 from ", 
 inname);
 ret=sscanf(line, "%d %d %d %d %d %d %d %d", &groupnumber,&dummy,
 &dummy,&dummy,&dummy, &dummy,&dummy,&nument);
 exitif(ret==0, "readgroups: unexpected error 1 while reading set 2467 from ", 
 inname);
-/* printf("readgroups: groupnumber=%d, nument=%d\n", groupnumber, nument); */
+printf("readgroups: groupnumber=%d, nument=%d\n", groupnumber, nument);
 if(groupnumber==-1) break;
 numgroup++;
 exitif(numgroup>maxgroup, "readgroups: error too many groups.",NULL);
-exitif(nument<=0, "readgroups: error wrong nument <0", NULL);
+exitif(nument<=0, "readgroups: error #3 wrong nument <0", NULL);
 groupnumbers[numgroup]=groupnumber;
 groupents[numgroup]=nument;
 
@@ -863,7 +934,7 @@ inname);
 ret=sscanf(line, "%s", &groupname);
 exitif(ret==0, "readgroups: error reading groupname.", NULL);
 strcpy(groupnames[numgroup],groupname);
-/* printf("readgroups: groupname=%s\n", groupnames[numgroup]); */
+printf("readgroups: groupname=%s\n", groupnames[numgroup]);
 for(i=0;i<nument/2;i++)                                {
 sret=fgets(line, maxline, fid);
 exitif(sret==0, "readgroups: unexpected end-of-line while reading set 2467 from ",
@@ -887,13 +958,12 @@ exitif(*(elnode)<=0||*(elnode+1)<=0,
 grouptypes[numgroup][nument-1]=*elnode;
 groupmembers[numgroup][nument-1]=*(elnode+1);          }
 
-/* printf("readgroups: List of group #%d, name= %s\n", 
-groupnumbers[numgroup],groupnames[numgroup]);
+//printf("readgroups: List of group #%d, name= %s\n", groupnumbers[numgroup],groupnames[numgroup]);
 for(i=0;i<nument;i++)                                  {
-printf("type=%d, entity=%d\n", grouptypes[numgroup][i],groupmembers[numgroup][i]);
-                                                       }   */
+//printf("type=%d, entity=%d\n", grouptypes[numgroup][i],groupmembers[numgroup][i]);
+                                                       } 
 /* find pointers to element data of elements of this group. */
-printf("readgroups: indexing entities of group %s\n", groupnames[numgroup]);
+printf("readgroups: #1 indexing entities of group %s\n", groupnames[numgroup]);
 for(i=0;i<nument;i++)                                  {
 if(i%10000==0&&i!=0)printf("readgroups: processing entity %d\n",i);
 groupeltypes[numgroup][i]=0;
@@ -909,11 +979,137 @@ exitif(NULL, "readgroups: error: Element listed in group does not exist.", NULL)
 exitloop:{}                                            }
                                                             }     }
 
+else if(key==2477) { // prool: begin 2477 second processing
+int max_nument=0; // prool
+//printf("prool trace #09\n");
+for(;;)                                                       {
+sret=fgets(line, maxline, fid);
+//printf("prool trace #0a\n");
+//printf("prool second proc. group header '%s'\n", line);
+exitif(sret==0, "readgroups: unexpected end-of-line while reading set 2477 from ", 
+inname);
+ret=sscanf(line, "%d %d %d %d %d %d %d %d", &groupnumber,&dummy,
+&dummy,&dummy,&dummy, &dummy,&dummy,&nument);
+//printf("prool trace #0b\n");
+exitif(ret==0, "readgroups: unexpected error 1 while reading set 2477 from ", 
+inname);
+printf("prool debug readgroups: groupnumber=%d, nument=%d\n", groupnumber, nument);
+if(groupnumber==-1) break;
+numgroup++;
+exitif(numgroup>maxgroup, "readgroups: error too many groups.",NULL);
+exitif(nument<=0, "readgroups: error #4 wrong nument <0", NULL);
+groupnumbers[numgroup]=groupnumber;
+groupents[numgroup]=nument;
+
+/* prool: search of maximum of nument */
+if (nument>max_nument) max_nument=nument;
+
+/* allocate space for groups. */
+groupnames[numgroup]=(char*)malloc(80*sizeof(int));
+exitif(groupnames[numgroup]==0, 
+"readgroups: sorry cannot allocate storage for groupnames. ",NULL);
+groupmembers[numgroup]=(int*)malloc(sizeof(int)*nument);
+exitif(groupmembers[numgroup]==0, 
+"readgroups: cannot alloc storage for groupmembers. ",NULL);
+grouptypes[numgroup]=(int*)malloc(sizeof(int)*nument);
+exitif(grouptypes[numgroup]==0, 
+"readgroups: cannot alloc storage for grouptypes. ",NULL);
+grouppointers[numgroup]=(int*)malloc(sizeof(int)*nument);
+exitif(grouppointers[numgroup]==0, 
+"readgroups: cannot alloc storage for grouppointers. ",NULL);
+groupeltypes[numgroup]=(int*)malloc(sizeof(int)*nument);
+exitif(groupeltypes[numgroup]==0, 
+"readgroups: cannot alloc storage for groupeltypes. ",NULL);
+
+/* read group data. */
+sret=fgets(line, maxline, fid);
+//printf("prool trace #0c\n");
+//printf("prool second proc. groupname '%s'\n", line);
+exitif(sret==0, "readgroups: unexpected end-of-line while reading set 2477 from ",
+inname);
+ret=sscanf(line, "%s", &groupname);
+exitif(ret==0, "readgroups: error reading groupname.", NULL);
+strcpy(groupnames[numgroup],groupname);
+//printf("prool trace #0d\n");
+printf("prool debug readgroups: groupname=%s\n", groupnames[numgroup]);
+
+prool_counter=0;
+i=0;
+for(;;) {
+sret=fgets(line, maxline, fid);
+//printf("prool trace #0e\n");
+//printf("prool second proc. group line '%s'\n", line);
+exitif(sret==0, "readgroups: unexpected end-of-line while reading set 2477 from ", inname);
+ret=sscanf(line, "%d %d %d %d %d %d %d %d", elnode,elnode+1,elnode+2,elnode+3, elnode+4,elnode+5,elnode+6,elnode+7);
+//printf("prool trace #0f\n");
+
+// by prool:
+if (ret==4)
+	{// prool: short line
+//printf("prool trace #0g\n");
+	exitif(*(elnode)<=0||*(elnode+1)<=0, "prool:: readgroups: error #2 wrong group ID numbers.", NULL);
+	grouptypes[numgroup][i]=*elnode;
+	groupmembers[numgroup][i]=*(elnode+1);
+	prool_counter++;i++;
+	}
+else
+	{
+//printf("prool trace #0h\n");
+	exitif(*(elnode)<=0||*(elnode+1)<=0||*(elnode+4)<=0||*(elnode+5)<=0, "prool:: readgroups: error wrong group ID numbers.", NULL);
+	grouptypes[numgroup][i]=*elnode;
+	groupmembers[numgroup][i]=*(elnode+1);
+	grouptypes[numgroup][i+1]=*(elnode+4);
+	groupmembers[numgroup][i+1]=*(elnode+5);
+	prool_counter+=2;i+=2;
+	}
+//printf("prool trace #0i\n");
+if (prool_counter>=nument) break;
+//printf("prool trace #0j\n");
+} // end for
+
+//printf("prool trace #0k\n");
+#if 0 // prool
+if(nument%2==1)                                        {
+sret=fgets(line, maxline, fid);
+printf("prool second proc. group final line '%s'\n", line);
+exitif(sret==0, "readgroups: unexpected end-of-line while reading set 2477 from ", inname);
+ret=sscanf(line, "%d %d %d %d %d %d %d %d", elnode,elnode+1,elnode+2,elnode+3, elnode+4,elnode+5,elnode+6,elnode+7);
+exitif(*(elnode)<=0||*(elnode+1)<=0, "readgroups: error wrong group ID numbers.", NULL);
+grouptypes[numgroup][nument-1]=*elnode;
+groupmembers[numgroup][nument-1]=*(elnode+1);          } // end if
+#endif
+
+//printf("prool debug readgroups: List of group #%d, name= %s\n", groupnumbers[numgroup],groupnames[numgroup]);
+for(i=0;i<nument;i++)                                  {
+//printf("prool debug type=%d, entity=%d\n", grouptypes[numgroup][i],groupmembers[numgroup][i]);
+                                                       }
+/* find pointers to element data of elements of this group. */
+//printf("prool debug readgroups: #2 indexing entities of group %s\n", groupnames[numgroup]);
+for(i=0;i<nument;i++)                                  {
+if(i%10000==0&&i!=0)printf("prool debug readgroups: processing entity %d\n",i);
+groupeltypes[numgroup][i]=0;
+grouppointers[numgroup][i]=0;
+for(k=1;k<=12;k++)                                {
+for(l=0;l<elnumber[k];l++) {// for l begin
+if (groupmembers[numgroup][i]==elnumbers[k][l]) // prool: i don't know about this expression
+	{
+	if ((groupents[numgroup]==max_nument) || name_is_elem(groupnames[numgroup]))
+		{
+		if (grouptypes[numgroup][i]==8) { groupeltypes[numgroup][i]=k; grouppointers[numgroup][i]=l; goto exitloop2; }
+		}
+	else if (grouptypes[numgroup][i]==7) {groupeltypes[numgroup][i]=k; grouppointers[numgroup][i]=l; goto exitloop2; }
+	}
+} // for l end
+}
+exitif(NULL, "readgroups: error: Element listed in group does not exist.", NULL);
+exitloop2:{}                                            }
+                                                            }     } // prool: end of 2477 second processing
+
 else                                                              {
 for(;;)                                                     {
 sret=fgets(line, maxline, fid);
 if(sret==0)                                            {
-printf("readgroups: end-of-file while reading from %s\n", inname);
+//printf("readgroups: end-of-file while reading from %s\n", inname);
 break;                                                 }     
 if(strncmp(line, "    -1",6)==0) break;                     }    }   }   }    }
 /*============================================================================*/
@@ -952,9 +1148,9 @@ k=0;
 for(i=1;i<=12;i++)                                                       {
 if(elnumber[i]>0&&(dimensions[i]==maxdimen||full==1))          {
 printf("writemesh: processing elset %s\n", nomabq[i]);
-/* printf("writemesh: i=%d, dimensions[i]=%d, maxdimen=%d\n", 
-i, dimensions[i], maxdimen);  */
-if(dimensions[i]==1)                                           { 
+printf("writemesh: i=%d, dimensions[i]=%d, maxdimen=%d\n", 
+i, dimensions[i], maxdimen);
+/*if(dimensions[i]==1)                                           { 
 fprintf(fid, "*beam section, section=rect, material=steel, elset=%s\n", 
 nomabq[i]);
 fprintf(fid, "1.0, 1.0\n");                                    }
@@ -964,7 +1160,7 @@ fprintf(fid, "1.0\n");
                                                                }
 if(dimensions[i]==3)                                           {
 fprintf(fid, "*solid section, material=steel, elset=%s\n", nomabq[i]);
-                                                               }
+                                                               } */
 fprintf(fid, "*element, elset=%s,type=%s\n", nomabq[i], nomabq[i]);
 for(l=0;l<elnumber[i];l++)                                     {
 k++;
@@ -972,7 +1168,7 @@ if(k%10000==0)printf("writemesh: writing element %d\n",k);
 fprintf(fid, "%d, ",elnumbers[i][l]);
 for(n=0;n<numnodes[i];n++)                                {
 fprintf(fid, "%d, ",elem[i][numnodes[i]*l+n]);
-if(n==15) fprintf(fid, "\n");                             }
+if(n==12) fprintf(fid, "\n");                             }
 fprintf(fid, "\n");                                            }     }    }
 
 printf("writemesh: writing groups of elements: *ELSETs. \n");
@@ -1027,8 +1223,7 @@ l=groupeltypes[n][k];
 dim=dimensions[l];
 m=grouppointers[n][k];
 
-/* printf("surface: vol type i=%d, surf type l=%d, surf number m=%d, dim=%d \n", 
-i,l,m,dim);  */
+//printf("surface: vol type i=%d, surf type l=%d, surf number m=%d, dim=%d \n", i,l,m,dim);
 
 /* if dimension fits, e.g. .eq. maxdimen-1, search for matching surface. */
 if(dim==maxdimen-1  && (l==smatch[0][i]||l==smatch[1][i]))  {
@@ -1038,14 +1233,14 @@ if(j%1000==0) printf("surface: converting surface element %d\n", k+1);
 /* loop on volume elements */
 for(o=0;o<elnumber[i];o++)                              { 
 
-/* printf("surf=%d, vol=%d, facepoint=%d, maxface=%d\n", m,o,facepoint, maxface);  */
+//printf("surf=%d, vol=%d, facepoint=%d, maxface=%d\n", m,o,facepoint, maxface);
 
 /* start loop on all surfaces of vol element */
 for(p=1;p<=maxface;p++)                             { 
 
 /* number of nodes at this surface. */
 facnod=faces[facepoint][p][0];
-/* printf("facnod=%d\n", facnod); */
+//printf("facnod=%d\n", facnod);
 
 /* loop on all edge nodes on surface of volume element*/
 nodcount=0;
@@ -1057,15 +1252,15 @@ for(r=1;r<=facnod;r++)                        {
 if(elem[i][numnodes[i]*o+s-1]==elem[l][numnodes[l]*m+r-1])nodcount++; 
                                               }  
 if(nodcount<q) break;                            }
-/* printf("n=%d, o=%d, p=%d, nodcount=%d\n", n,o,p,nodcount);  */
+//printf("n=%d, o=%d, p=%d, nodcount=%d\n", n,o,p,nodcount);
 if(facnod==nodcount)                             {
 surfcounter++;
 if(surfcounter>6*numvol)                     {
 printf("surface: error too many surfaces found.\n");
 printf("surface: surfcounter=%d\n", surfcounter);
 exit(0);                                     }
-/* printf("facnod=%d, nodcount=%d\n", facnod, nodcount);
-printf("surfcounter=%d\n", surfcounter);  */
+//printf("facnod=%d, nodcount=%d\n", facnod, nodcount);
+//printf("surfcounter=%d\n", surfcounter);
 surfnum[surfcounter]=elnumbers[l][m];
 volelnum[surfcounter]=elnumbers[i][o];
 facenum[surfcounter]=p;
@@ -1106,7 +1301,7 @@ fprintf(fid, "\n");
 
 /* generate ABAQUS input lines for element surfaces. */
 for(m=0;m<maxgroup;m++)                                                    {
-/* printf("surface: processing group set %d, %s\n ", m, groupnames[m]); */
+printf("surface: processing group set %d, %s\n ", m, groupnames[m]);
 i=0;
 for(p=1;p<=6;p++)                                                      {
 j=0;
