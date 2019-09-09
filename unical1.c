@@ -339,7 +339,7 @@ int maxdimen, mindimen;    /* min and max dimensions found in model. */
 #define TMPNAME "prool.tmp"
 char tmp_groupname[BUFSIZE];
 
-int get_groupname(char *input, *output)
+int get_groupname(char *input, char *output)
 // input - input line
 // output - groupname
 // return 0 if error, non zero if not error
