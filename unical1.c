@@ -337,6 +337,26 @@ int maxdimen, mindimen;    /* min and max dimensions found in model. */
 #ifdef PROOL
 #define BUFSIZE 512
 #define TMPNAME "prool.tmp"
+char tmp_groupname[BUFSIZE];
+
+int get_groupname(char *input, *output)
+// input - input line
+// output - groupname
+// return 0 if error, non zero if not error
+{
+char *cc;
+output[0]=0;
+strcpy(output,input);
+cc=strchr(output,'\r');
+if (cc) *cc=0;
+cc=strchr(output,'\n');
+if (cc) *cc=0;
+cc=strchr(output,' ');
+if (cc) *cc='_';
+//printf("prool: get_groupname '%s'\n", output);
+return strlen(output);
+}
+
 void process_e(char *filename)
 {FILE *f1, *f2;
 char buf[BUFSIZE], *pp;
@@ -613,7 +633,7 @@ exitif(nument<=0, "countunv: error #1 wrong nument <0", NULL);
 sret=fgets(line, maxline, fid);
 exitif(sret==0, "countunv: unexpected end-of-line while reading set 2467 from ",
 inname);
-ret=sscanf(line, "%s", &groupname);
+ret=get_groupname(line,&groupname);
 exitif(ret==0, "countunv: error reading groupname.", NULL);
 printf("countunv: groupname=%s\n", groupname);
 for(i=1;i<=nument/2+nument%2;i++)                      {
@@ -636,7 +656,7 @@ exitif(nument<=0, "countunv: error #2 wrong nument <=0", NULL);
 sret=fgets(line, maxline, fid);
 //printf("prool groupname=%s\n", line);
 exitif(sret==0, "countunv: unexpected end-of-line while reading set 2477 from ", inname);
-ret=sscanf(line, "%s", &groupname);
+ret=get_groupname(line,&groupname);
 exitif(ret==0, "countunv: error reading groupname.", NULL);
 printf("prool debug countunv: groupname=%s\n", groupname);
 
@@ -931,7 +951,7 @@ exitif(groupeltypes[numgroup]==0,
 sret=fgets(line, maxline, fid);
 exitif(sret==0, "readgroups: unexpected end-of-line while reading set 2467 from ",
 inname);
-ret=sscanf(line, "%s", &groupname);
+ret=get_groupname(line,&groupname);
 exitif(ret==0, "readgroups: error reading groupname.", NULL);
 strcpy(groupnames[numgroup],groupname);
 printf("readgroups: groupname=%s\n", groupnames[numgroup]);
@@ -1027,7 +1047,7 @@ sret=fgets(line, maxline, fid);
 //printf("prool second proc. groupname '%s'\n", line);
 exitif(sret==0, "readgroups: unexpected end-of-line while reading set 2477 from ",
 inname);
-ret=sscanf(line, "%s", &groupname);
+ret=get_groupname(line,&groupname);
 exitif(ret==0, "readgroups: error reading groupname.", NULL);
 strcpy(groupnames[numgroup],groupname);
 //printf("prool trace #0d\n");
