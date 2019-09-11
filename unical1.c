@@ -360,6 +360,7 @@ return strlen(output);
 void process_e(char *filename)
 {FILE *f1, *f2;
 char buf[BUFSIZE], *pp;
+char tmp_buf[BUFSIZE];
 int i,len;
 
 f1=fopen(filename,"r");
@@ -371,6 +372,14 @@ while(!feof(f1))
     {
     buf[0]=0;
     fgets(buf,BUFSIZE,f1);
+#define LONG_NAME "PERMANENT GROUP"
+    // replace LONG_NAME to "gr"
+    if (memcmp(buf,LONG_NAME,strlen(LONG_NAME))==0)
+	{
+	strcpy(tmp_buf,buf);
+	strcpy(buf,"gr");
+	strcat(buf,pp+strlen(LONG_NAME));
+	}
     // replace D to E
     len=strlen(buf);
     for (i=0;i<len;i++)
