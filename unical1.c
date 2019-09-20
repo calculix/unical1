@@ -337,6 +337,7 @@ int maxdimen, mindimen;    /* min and max dimensions found in model. */
 #ifdef PROOL
 #define BUFSIZE 512
 #define TMPNAME "prool.tmp"
+int max_nument;
 char tmp_groupname[BUFSIZE];
 
 int get_groupname(char *input, char *output)
@@ -429,6 +430,7 @@ return ret;
 int main (int argc, char **argv)                                               {
 /* printf("argc=%d\n", argc);  */
 #ifdef PROOL
+max_nument=0;
 if(argc==3)
 {
 exitif(strlen(argv[1])>195, "unical: sorry input file name too long.", NULL);
@@ -662,6 +664,10 @@ printf("prool debug countunv: groupnumber=%d, nument=%d\n", groupnumber, nument)
 if(groupnumber==-1) break;
 maxgroup++;
 exitif(nument<=0, "countunv: error #2 wrong nument <=0", NULL);
+
+/* calculate maximum. prool */
+if (nument>max_nument) max_nument=nument;
+
 sret=fgets(line, maxline, fid);
 //printf("prool groupname=%s\n", line);
 exitif(sret==0, "countunv: unexpected end-of-line while reading set 2477 from ", inname);
@@ -1009,7 +1015,6 @@ exitloop:{}                                            }
                                                             }     }
 
 else if(key==2477) { // prool: begin 2477 second processing
-int max_nument=0; // prool
 //printf("prool trace #09\n");
 for(;;)                                                       {
 sret=fgets(line, maxline, fid);
@@ -1029,9 +1034,6 @@ exitif(numgroup>maxgroup, "readgroups: error too many groups.",NULL);
 exitif(nument<=0, "readgroups: error #4 wrong nument <0", NULL);
 groupnumbers[numgroup]=groupnumber;
 groupents[numgroup]=nument;
-
-/* prool: search of maximum of nument */
-if (nument>max_nument) max_nument=nument;
 
 /* allocate space for groups. */
 groupnames[numgroup]=(char*)malloc(80*sizeof(int));
@@ -1122,6 +1124,7 @@ for(k=1;k<=12;k++)                                {
 for(l=0;l<elnumber[k];l++) {// for l begin
 if (groupmembers[numgroup][i]==elnumbers[k][l]) // prool: i don't know about this expression
 	{
+	//printf("prool's debug: max_nument=%i\n", max_nument);
 	if ((groupents[numgroup]==max_nument) || name_is_elem(groupnames[numgroup]))
 		{
 		if (grouptypes[numgroup][i]==8) { groupeltypes[numgroup][i]=k; grouppointers[numgroup][i]=l; goto exitloop2; }
