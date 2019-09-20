@@ -1316,6 +1316,8 @@ for(n=0;n<=surfcounter;n++) printf("%5d %10d %10d %10d %10d\n",
 n,surfnum[n],volelnum[n],facenum[n],group[n]);                             }  */
 
 /* ecrire les element surface sets correspondant aux groupes. */
+
+/* This is "F-groups". Disable this or not - is question! Prool. */
 for(m=0;m<maxgroup;m++)                                                    {
 printf("surface: processing group set %d, %s\n", m, groupnames[m]);
 for(p=1;p<=6;p++)                                                      {
