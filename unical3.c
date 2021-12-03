@@ -497,7 +497,7 @@ exitif(nument<0, "countunv: error wrong nument <0", NULL);
 sret=fgets(line, maxline, fid);
 exitif(sret==0, "countunv: unexpected end-of-line while reading set 2467 from ",
 inname);
-ret=sscanf(line, "%s", &groupname);
+ret=sscanf(line, "%s", groupname);
 exitif(ret==0, "countunv: error reading groupname.", NULL);
 /* printf("countunv: groupname=%s\n", groupname); */
 for(i=1;i<=nument/2+nument%2;i++)                      {
@@ -769,7 +769,7 @@ exitif(groupeltypes[numgroup]==0,
 sret=fgets(line, maxline, fid);
 exitif(sret==0, "readgroups: unexpected end-of-line while reading set 2467 from ",
 inname);
-ret=sscanf(line, "%s", &groupname);
+ret=sscanf(line, "%s", groupname);
 exitif(ret==0, "readgroups: error reading groupname.", NULL);
 strcpy(groupnames[numgroup],groupname);
 /* printf("readgroups: groupname=%s\n", groupnames[numgroup]); */

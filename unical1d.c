@@ -640,7 +640,7 @@ maxgroup++;
 exitif(nument<=0, "countunv: error #1 wrong nument <0", NULL);
 sret=fgets(line, maxline, fid);
 exitif(sret==0, "countunv: error #2: unexpected end-of-line while reading set 2467 from ", inname);
-ret=get_groupname(line,&groupname);
+ret=get_groupname(line,groupname);
 exitif(ret==0, "countunv: error reading groupname.", NULL);
 printf("countunv: groupname=%s\n", groupname);
 
@@ -687,7 +687,7 @@ if (nument>max_nument) max_nument=nument;
 sret=fgets(line, maxline, fid);
 //printf("prool groupname=%s\n", line);
 exitif(sret==0, "countunv: unexpected end-of-line while reading set 2477 from ", inname);
-ret=get_groupname(line,&groupname);
+ret=get_groupname(line,groupname);
 exitif(ret==0, "countunv: error reading groupname.", NULL);
 printf("prool debug countunv: groupname=%s\n", groupname);
 
@@ -973,7 +973,7 @@ exitif(groupeltypes[numgroup]==0, "readgroups: cannot alloc storage for groupelt
 /* read group data. */
 sret=fgets(line, maxline, fid);
 exitif(sret==0, "readgroups: unexpected end-of-line while reading set 2467 from ", inname);
-ret=get_groupname(line,&groupname);
+ret=get_groupname(line,groupname);
 exitif(ret==0, "readgroups: error reading groupname.", NULL);
 strcpy(groupnames[numgroup],groupname);
 printf("readgroups: groupname=%s\n", groupnames[numgroup]);
@@ -1095,7 +1095,7 @@ sret=fgets(line, maxline, fid);
 //printf("prool second proc. groupname '%s'\n", line);
 exitif(sret==0, "readgroups: unexpected end-of-line while reading set 2477 from ",
 inname);
-ret=get_groupname(line,&groupname);
+ret=get_groupname(line,groupname);
 exitif(ret==0, "readgroups: error reading groupname.", NULL);
 strcpy(groupnames[numgroup],groupname);
 //printf("prool trace #0d\n");
